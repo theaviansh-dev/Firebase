@@ -4,6 +4,7 @@ export const boot = async () => {
     const { initializeApp } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js");
     const { getAuth, RecaptchaVerifier, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js");
     const { config: firebaseConfig, COLLECTION: collectionName } = await import("./key.js");
+    const { default: offlineCard } = await import("./offlineCard.js");
     const { default: bootstrap } = await import('./bootstrap.js');
 
     Alpine.plugin(persist);
@@ -48,6 +49,16 @@ export const boot = async () => {
                 });
 
                 this.$nextTick(async () => {
+
+                    //for title
+                    if (this.viewOne) { document.title = "Human Varification" }
+                    if (this.viewTwo) { document.title = "Authentication" }
+                    if (this.viewThree) { document.title = "FireStore" }
+                    this.$watch(() => [this.viewOne, this.viewTwo, this.viewThree], () => {
+                        if (this.viewOne) { document.title = "Human Varification" }
+                        if (this.viewTwo) { document.title = "Authentication" }
+                        if (this.viewThree) { document.title = "FireStore" }
+                    });
 
                     //for captcha
                     if (this.viewOne) {
@@ -122,6 +133,15 @@ export const boot = async () => {
                     this.password = "123allsmall";
                 }
             },
+            formatError(code) {
+                switch (code) {
+                    case 'auth/invalid-credential': return 'Invalid email or password match.';
+                    case 'auth/email-already-in-use': return 'This email profile is already taken.';
+                    case 'auth/weak-password': return 'Password should be at least 6 characters.';
+                    case 'auth/invalid-email': return 'Please enter a valid email structure.';
+                    default: return code.replace('auth/', '').replace(/-/g, ' ');
+                }
+            },
             //////////////////    for auth      /////////////////
 
             destroy() {
@@ -141,6 +161,14 @@ export const boot = async () => {
     window.Alpine = Alpine;
     Alpine.start();
 
+    //check for internet
+    window.addEventListener("offline", () => {
+        offlineCard();
+    });
+    window.addEventListener("online", () => {
+        setTimeout(() => document.getElementById("offline-overlay")?.remove(), 500);
+    });
+
     // Register service worker
-    // bootstrap();
+    bootstrap();
 };
