@@ -2,14 +2,15 @@ export const boot = async () => {
     const { default: Alpine } = await import("https://cdn.jsdelivr.net/npm/alpinejs@3.15.0/dist/module.esm.js");
     const { default: persist } = await import("https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.15.0/dist/module.esm.js");
     const { initializeApp } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js");
-    const { getAuth, RecaptchaVerifier, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js");
-    const { config: firebaseConfig, COLLECTION: collectionName } = await import("./key.js");
+    const { getAuth, RecaptchaVerifier, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js");
+    const { bridge: firebaseConfig, COLLECTION: collectionName } = await import("./bridge.js");
     const { default: offlineCard } = await import("./offlineCard.js");
     const { default: bootstrap } = await import('./bootstrap.js');
 
     Alpine.plugin(persist);
-    var app = initializeApp(firebaseConfig);
-    var auth = getAuth(app);
+    const app = initializeApp(JSON.parse(atob(firebaseConfig)));
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
 
     document.addEventListener("alpine:init", () => {
         Alpine.data("boot", () => ({
@@ -20,7 +21,8 @@ export const boot = async () => {
             viewThree: Alpine.$persist(false).as("viewThree"),    // Main UI
 
             //for captcha
-            verified: false,
+            captchaRequest: Alpine.$persist(Date.now()).as("captchaRequest"),
+            captchVarified: Alpine.$persist(false).as("captchVarified"),
             status: "",
             recaptchaVerifier: null,
             recaptchaWidgetId: null,
@@ -31,11 +33,16 @@ export const boot = async () => {
             email: '',
             password: '',
             errorMessage: '',
-            user: null,
+            user: Alpine.$persist(null).as("user"),
             unsubscribeAuth: null,
 
             //global init
             async init() {
+
+                //for captcha when site revisit
+                if (this.captchVarified && (Date.now() - this.captchaRequest) >= 24 * 60 * 60 * 1000) {
+                    this.viewOne = true; this.viewTwo = this.viewThree = false;
+                }
 
                 //for auth
                 this.unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
@@ -43,22 +50,24 @@ export const boot = async () => {
                     this.loading = false;
                     if (firebaseUser) {
                         this.clearForm();
-                        this.viewTwo = this.viewOne = false;
+                        this.viewTwo = false;
                         this.viewThree = true;
                     }
                 });
 
-                this.$nextTick(async () => {
-
-                    //for title
+                //for title
+                if (this.viewOne) { document.title = "Human Varification" }
+                if (this.viewTwo) { document.title = "Authentication" }
+                if (this.viewThree) { document.title = "FireStore" }
+                this.$watch(() => [this.viewOne, this.viewTwo, this.viewThree], () => {
                     if (this.viewOne) { document.title = "Human Varification" }
                     if (this.viewTwo) { document.title = "Authentication" }
                     if (this.viewThree) { document.title = "FireStore" }
-                    this.$watch(() => [this.viewOne, this.viewTwo, this.viewThree], () => {
-                        if (this.viewOne) { document.title = "Human Varification" }
-                        if (this.viewTwo) { document.title = "Authentication" }
-                        if (this.viewThree) { document.title = "FireStore" }
-                    });
+                });
+
+
+
+                this.$nextTick(async () => {
 
                     //for captcha
                     if (this.viewOne) {
@@ -68,23 +77,24 @@ export const boot = async () => {
                             this.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
                                 size: "normal",
                                 theme: "light",
-                                callback: (response) => {
-                                    this.verified = true;
+                                callback: () => {
+                                    this.captchVarified = true;
                                     this.status = "Starting App!";
-                                    setTimeout(() => { this.viewOne = false; this.viewTwo = true; document.title = "Authentication"; }, 1700);
+                                    setTimeout(() => { this.viewOne = false; if (!this.user) { this.viewTwo = true; } }, 1700);
                                 },
                                 "expired-callback": () => {
-                                    this.verified = false;
+                                    this.captchVarified = false;
                                     this.status = "Verification expired";
                                     setTimeout(() => window.location.reload(), 500);
                                 },
                                 "error-callback": (err) => {
                                     console.error("reCAPTCHA error:", err);
-                                    this.verified = false;
+                                    this.captchVarified = false;
                                     this.status = "Verification error";
                                 }
                             });
                             this.recaptchaWidgetId = await this.recaptchaVerifier.render();
+                            // setTimeout(() => console.clear(), 1000);
                         } catch (error) {
                             console.error("Failed to initialize reCAPTCHA:", error);
                             this.status = "Could not load CAPTCHA";
@@ -95,6 +105,9 @@ export const boot = async () => {
             },
 
             //////////////////    for auth      /////////////////
+            async popupsignin() {
+                await signInWithPopup(auth, provider).catch(err => this.errorMessage = this.formatError(err.code));
+            },
             async handleSubmit() {
                 this.loading = true;
                 this.errorMessage = '';
@@ -113,6 +126,7 @@ export const boot = async () => {
                 this.loading = true;
                 try {
                     await signOut(auth);
+                    this.user = null;
                     this.viewOne = this.viewThree = false;
                     this.viewTwo = true;
                 } catch (error) {
@@ -139,6 +153,7 @@ export const boot = async () => {
                     case 'auth/email-already-in-use': return 'This email profile is already taken.';
                     case 'auth/weak-password': return 'Password should be at least 6 characters.';
                     case 'auth/invalid-email': return 'Please enter a valid email structure.';
+                    case 'auth/popup-closed-by-user': return 'Popup got closed by user.';
                     default: return code.replace('auth/', '').replace(/-/g, ' ');
                 }
             },
