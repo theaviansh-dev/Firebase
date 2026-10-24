@@ -6,7 +6,7 @@ const bootstrap = () => setTimeout(() => {
     cookie.classList.remove("hidden");
     allow.addEventListener("click", async () => {
         allow.disabled = true;
-        try { await navigator.serviceWorker.register("/sw.js"), localStorage.setItem("is_cookie_allowed", "true"), window.location.reload();
+        try { await navigator.serviceWorker.register(`${window.location.href}sw.js`), localStorage.setItem("is_cookie_allowed", "true"), window.location.reload();
         } catch (e) { console.error("Service Worker registration failed:", e), allow.disabled = !1 }
     }, { once: true });
 
