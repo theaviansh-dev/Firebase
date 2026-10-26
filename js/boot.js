@@ -98,6 +98,7 @@ export const boot = async () => {
                         } catch (error) {
                             console.error("Failed to initialize reCAPTCHA:", error);
                             this.status = "Could not load CAPTCHA";
+                            this.viewOne = false; this.viewTwo = true;
                         }
                     }
 

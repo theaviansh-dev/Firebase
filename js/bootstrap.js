@@ -3,15 +3,16 @@ const bootstrap = () => setTimeout(() => {
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
     const cookie = document.getElementById("cookie");
     const allow = document.getElementById("allow");
-    cookie.classList.remove("hidden");
+    cookie.style.display = "block";
     allow.addEventListener("click", async () => {
         allow.disabled = true;
-        try { await navigator.serviceWorker.register(`${window.location.href}sw.js`), localStorage.setItem("is_cookie_allowed", "true"), window.location.reload();
+        try {
+            await navigator.serviceWorker.register(new URL("../sw.js", import.meta.url)), localStorage.setItem("is_cookie_allowed", "true"), window.location.reload();
         } catch (e) { console.error("Service Worker registration failed:", e), allow.disabled = !1 }
     }, { once: true });
 
     document.getElementById("notnow").addEventListener("click", () => {
-        cookie.classList.add("hidden");
+        cookie.style.display = "none";
     }, { once: true });
 }, 2500);
 

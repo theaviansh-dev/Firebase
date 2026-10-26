@@ -1,1 +1,1 @@
-import { boot } from "./boot.js"; import { restart } from "./restart.js"; "serviceWorker" in navigator && navigator.serviceWorker.getRegistration().then(function (i) { i && i.active ? boot() : restart() }).catch(r => console.log(`Error While Starting Server! \n${r}`));
+import { restart } from "./restart.js"; "serviceWorker" in navigator && navigator.serviceWorker.getRegistration().then(() => restart()).catch(r => console.log(`Error While Starting Server! \n${r}`));
