@@ -1,14 +1,14 @@
 {
-    "cache_name": "firebase-site-v2",
+    "cache_name": "firebase-site-v3",
     "static_files": [
         "./",
         "./index.html",
         "./logo.png",
         "./js/app.js",
-        "./js/restart.js",
         "./js/boot.js",
-        "./js/offlineCard.js",
+        "./js/bootstrap.js",
         "./js/bridge.js",
-        "./js/bootstrap.js"
+        "./js/initRecaptcha.js",
+        "./js/offlineCard.js"
     ]
 }

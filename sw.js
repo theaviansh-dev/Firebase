@@ -1,18 +1,9 @@
 
 const CACHE_PREFIX = "firebase-site-";
 const META_CACHE = "firebase-site-meta-v1";
-const ACTIVE_KEY = new URL(
-    "__sw_active_manifest__",
-    self.registration.scope
-).href;
-const PENDING_KEY = new URL(
-    "__sw_pending_manifest__",
-    self.registration.scope
-).href;
-const MANIFEST_URL = new URL(
-    "js/sw-version.json",
-    self.registration.scope
-).href;
+const ACTIVE_KEY = new URL("__sw_active_manifest__", self.registration.scope).href;
+const PENDING_KEY = new URL("__sw_pending_manifest__", self.registration.scope).href;
+const MANIFEST_URL = new URL("js/sw-version.json", self.registration.scope).href;
 
 const UPDATE_TIMEOUT_MS = 10000;
 
