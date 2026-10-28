@@ -2,7 +2,7 @@
   "name": "FireStore",
   "short_name": "FireStore",
   "description": "A mini working demo using Firebase Cloud Firestore is a small application that stores, reads, updates, and deletes data in a cloud database.",
-  "start_url": "/",
+  "start_url": "/Firebase",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#000000",
