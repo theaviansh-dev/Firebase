@@ -9,6 +9,7 @@
         "./js/bootstrap.js",
         "./js/bridge.js",
         "./js/initRecaptcha.js",
-        "./js/offlineCard.js"
+        "./js/offlineCard.js",
+        "./js/pwa-worker.js"
     ]
 }

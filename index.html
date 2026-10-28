@@ -3,15 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="./logo.png" rel="icon" type="image/png">
     <title>FireBase</title>
+    <link rel="icon" href="logo.png" type="image/png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#000"></meta>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="./js/app.js" type="module"></script>
 </head>
 <body>
     <main x-data="boot">
         <template x-if="currentView === 'verification'">
-            <section class="min-h-screen min-w-screen bg-slate-100 text-slate-800 z-10 top-0 fixed">
+            <section class="min-h-screen min-w-screen bg-slate-100 text-slate-800">
                 <div class="min-h-screen flex items-center justify-center px-4 py-8">
                     <div class="w-full max-w-md rounded-2xl bg-white p-8 sm:p-10 shadow-xl shadow-slate-200/70 text-center">
                         <div class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-50">
@@ -98,7 +100,7 @@
                 </div>
             </section>
         </template>
-        <section id="cookie" class="min-h-screen min-w-screen bg-gray-900/20 text-slate-800 fixed z-20 top-0 backdrop-blur-md" style="display: none;">
+        <section id="cookie" class="min-h-screen min-w-screen bg-gray-900/20 text-slate-800 fixed z-10 top-0 backdrop-blur-md" style="display: none;">
             <div class="min-h-screen flex items-center justify-center px-4 py-8">
                 <div class="w-full max-w-sm rounded-2xl bg-white p-6 sm:p-10 shadow-xl shadow-slate-400/30 text-center outline outline-gray-300">
                     <h1 class="text-3xl font-bold tracking-tight text-slate-900">Accept Cookies?</h1>
